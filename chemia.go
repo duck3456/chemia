@@ -11,6 +11,33 @@ import (
 	"time"
 )
 
+var (
+	num1 int
+	num2 int
+	num3 int
+	num4 int
+
+	array1 []string
+	array1FirstHalf []string
+	array1SecondHalf []string
+	array1Final []string
+	array2 []string
+	array3 []string
+	array4 []string
+	array5 []string
+	
+	result bool = false
+
+	finalResult string
+
+	tries int = 0
+
+	input string
+
+	isFirst bool
+	canReturn bool
+)
+
 func main() {
 	fmt.Println()
 	fmt.Println("Program ten uzgadnia reakcje wymiany; reakcja musi zawierać 2 substraty i 2 produkty")
@@ -19,35 +46,8 @@ func main() {
 	fmt.Println("Program nie działa z nawiasami, więc np. zamiast (OH)2 trzeba zapisać O2H2")
 	fmt.Println()
 
-	rand.Seed(time.Now().UnixNano())
-	num1 := rand.Intn(6) + 1
-
 	fmt.Print("Wpisz reakcję: ")
-	input := ""
 	fmt.Scan(&input)
-
-	rand.Seed(time.Now().UnixNano() + 100)
-	num2 := rand.Intn(6) + 1
-	
-	array1 := isolateElements(input)
-
-	rand.Seed(time.Now().UnixNano() + 200)
-	num3 := rand.Intn(6) + 1
-
-	array1FirstHalf := makeFirstSmallerArray(array1)
-	array1SecondHalf := makeSecondSmallerArray(array1)
-
-	rand.Seed(time.Now().UnixNano() + 300)
-	num4 := rand.Intn(6) + 1
-
-	array1Final := multiplyElementsRandomly(array1FirstHalf, array1SecondHalf, []int{num1, num2, num3, num4})
-
-	array2 := isolateElementsEvenMore(array1Final)
-	array3 := countElements(array2)
-	array4 := makeFirstSmallerArray(array3)
-	array5 := makeSecondSmallerArray(array3)
-
-	result := EqualIgnoringOrder(array4, array5)
 
 	/*fmt.Println()
 	fmt.Println(array1)
@@ -61,31 +61,33 @@ func main() {
 	fmt.Println(result)*/
 
 	for !result {
+		tries++
+
 		rand.Seed(time.Now().UnixNano())
-		num1 := rand.Intn(6) + 1
+		num1 = rand.Intn(6) + 1
 
 		rand.Seed(time.Now().UnixNano() + 100)
-		num2 := rand.Intn(6) + 1
+		num2 = rand.Intn(6) + 1
 		
-		array1 := isolateElements(input)
+		array1 = isolateElements(input)
 
 		rand.Seed(time.Now().UnixNano() + 200)
-		num3 := rand.Intn(6) + 1
+		num3 = rand.Intn(6) + 1
 
-		array1FirstHalf := makeFirstSmallerArray(array1)
-		array1SecondHalf := makeSecondSmallerArray(array1)
+		array1FirstHalf = makeFirstSmallerArray(array1)
+		array1SecondHalf = makeSecondSmallerArray(array1)
 
 		rand.Seed(time.Now().UnixNano() + 300)
-		num4 := rand.Intn(6) + 1
+		num4 = rand.Intn(6) + 1
 
-		array1Final := multiplyElementsRandomly(array1FirstHalf, array1SecondHalf, []int{num1, num2, num3, num4})
+		array1Final = multiplyElementsRandomly(array1FirstHalf, array1SecondHalf, []int{num1, num2, num3, num4})
 
-		array2 := isolateElementsEvenMore(array1Final)
-		array3 := countElements(array2)
-		array4 := makeFirstSmallerArray(array3)
-		array5 := makeSecondSmallerArray(array3)
+		array2 = isolateElementsEvenMore(array1Final)
+		array3 = countElements(array2)
+		array4 = makeFirstSmallerArray(array3)
+		array5 = makeSecondSmallerArray(array3)
 
-		result := EqualIgnoringOrder(array4, array5)
+		result = EqualIgnoringOrder(array4, array5)
 
 		if result {
 			for i := 2; i < 10; i++ {
@@ -97,11 +99,17 @@ func main() {
 				}
 			}
 
-			finalResult := fmt.Sprint(num1) + array1[0] + "+" + fmt.Sprint(num2) + array1[1] + "_" + fmt.Sprint(num3) + array1[3] + "+" + fmt.Sprint(num4) + array1[4]
-			finalResult = strings.ReplaceAll(finalResult, "1", "")
+			finalResult = fmt.Sprint(num1) + array1[0] + "+" + fmt.Sprint(num2) + array1[1] + "_" + fmt.Sprint(num3) + array1[3] + "+" + fmt.Sprint(num4) + array1[4]
+			finalResult = strings.ReplaceAll(finalResult, "+1", "+")
+			finalResult = strings.ReplaceAll(finalResult, "_1", "_")
+			
+			if string(finalResult[0]) == "1" {
+				finalResult = finalResult[1:]
+			}
 
-			fmt.Print("Reakcja uzgodniona! ", finalResult)
+			fmt.Println("Reakcja uzgodniona!", finalResult)
 			fmt.Println()
+			fmt.Println("Losowe próby uzgodnienia podjęte przez program:", tries)
 			fmt.Scan(&input)
 			break
 		}
@@ -191,7 +199,7 @@ func isolateElementsEvenMore(elements []string) []string {
 	elementsString := strings.Join(elements, "")
 
 	lastStopIndex := 0
-	isFirst := true
+	isFirst = true
 
 	for i := 0; i < len(elementsString); i++ {
 		
@@ -222,9 +230,16 @@ func countElements(evenMoreIsolatedElements []string) []string {
 			//fmt.Println(string(evenMoreIsolatedElements[i][len(evenMoreIsolatedElements[i])-1:]))
 
 			num, _ := strconv.Atoi(string(evenMoreIsolatedElements[i][len(evenMoreIsolatedElements[i])-1:]))
+			numTwoDigit, _ := strconv.Atoi(string(evenMoreIsolatedElements[i][len(evenMoreIsolatedElements[i])-2:]))
 
-			for j := 0; j < num; j++ {
-				countedElements = append(countedElements, evenMoreIsolatedElements[i])
+			if numTwoDigit == 0 {
+				for j := 0; j < num; j++ {
+					countedElements = append(countedElements, evenMoreIsolatedElements[i])
+				}
+			} else {
+				for j := 0; j < numTwoDigit; j++ {
+					countedElements = append(countedElements, evenMoreIsolatedElements[i])
+				}
 			}
 		} else {
 			countedElements = append(countedElements, evenMoreIsolatedElements[i])
@@ -260,7 +275,7 @@ func makeSecondSmallerArray(countedElements []string) []string {
 	
 	//1. make an array like this: [Na H H S O O O O]
 	secondSmallerArray := []string{}
-	canReturn := false
+	canReturn = false
 
 	for i := 0; i < len(countedElements); i++ {
 		if canReturn {
