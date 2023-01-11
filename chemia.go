@@ -7,15 +7,13 @@ import (
 	"strconv"
 	"sort"
 	"reflect"
-	"math/rand"
-	"time"
 )
 
 var (
-	num1 int
-	num2 int
-	num3 int
-	num4 int
+	num1 int = 0
+	num2 int = 1
+	num3 int = 1
+	num4 int = 1
 
 	array1 []string
 	array1FirstHalf []string
@@ -38,12 +36,18 @@ var (
 	canReturn bool
 )
 
+const (
+	MAX_NUM = 6
+)
+
 func main() {
 	fmt.Println()
-	fmt.Println("Program ten uzgadnia reakcje wymiany; reakcja musi zawierać 2 substraty i 2 produkty")
+	fmt.Println("Program ten uzgadnia reakcje wymiany i podwójnej wymiany; reakcja musi zawierać 2 substraty i 2 produkty")
 	fmt.Println("Reakcja musi być zapisana w specjalnym formacie, bez spacji, a zamiast strzałki jest _")
 	fmt.Println("Np. NaOH+N2O5_NaNO3+H2O")
-	fmt.Println("Program nie działa z nawiasami, więc np. zamiast (OH)2 trzeba zapisać O2H2")
+	fmt.Println("Program nie działa z nawiasami, więc np. zamiast (OH)2 trzeba zapisać O2H2, a zamiast Ca(NO3)2 - CaN2O6")
+	fmt.Println("Program nie uzgadnia reakcji, gdzie współczynnik stechiometryczny może być większy niż 6")
+	fmt.Println("Więc jeśli czekasz ponad kilka sekund i program nie uzgodnił reakcji, to albo reakcja jest zapisana źle, albo wymaga uzgodnienia z większymi współczynnikami stechiometrycznymi")
 	fmt.Println()
 
 	fmt.Print("Wpisz reakcję: ")
@@ -62,23 +66,32 @@ func main() {
 
 	for !result {
 		tries++
+		num1++
 
-		rand.Seed(time.Now().UnixNano())
-		num1 = rand.Intn(6) + 1
+		if num1 > MAX_NUM {
+			num1 = 1
+			num2++
+		}
 
-		rand.Seed(time.Now().UnixNano() + 100)
-		num2 = rand.Intn(6) + 1
+		if num2 > MAX_NUM {
+			num2 = 1
+			num3++
+		}
+
+		if num3 > MAX_NUM {
+			num3 = 1
+			num4++
+		}
+
+		if num4 > MAX_NUM {
+			num4 = 1
+		}
+
 		
 		array1 = isolateElements(input)
 
-		rand.Seed(time.Now().UnixNano() + 200)
-		num3 = rand.Intn(6) + 1
-
 		array1FirstHalf = makeFirstSmallerArray(array1)
 		array1SecondHalf = makeSecondSmallerArray(array1)
-
-		rand.Seed(time.Now().UnixNano() + 300)
-		num4 = rand.Intn(6) + 1
 
 		array1Final = multiplyElementsRandomly(array1FirstHalf, array1SecondHalf, []int{num1, num2, num3, num4})
 
@@ -90,7 +103,7 @@ func main() {
 		result = EqualIgnoringOrder(array4, array5)
 
 		if result {
-			for i := 2; i < 10; i++ {
+			for i := 2; i <= MAX_NUM; i++ {
 				if (num1%i == 0 && num2%i == 0 && num3%i == 0 && num4%i == 0) {
 					num1 = num1/i
 					num2 = num2/i
@@ -109,7 +122,7 @@ func main() {
 
 			fmt.Println("Reakcja uzgodniona!", finalResult)
 			fmt.Println()
-			fmt.Println("Losowe próby uzgodnienia podjęte przez program:", tries)
+			fmt.Println("Próby uzgodnienia podjęte przez program:", tries)
 			fmt.Scan(&input)
 			break
 		}
@@ -273,7 +286,6 @@ func makeFirstSmallerArray(countedElements []string) []string {
 
 func makeSecondSmallerArray(countedElements []string) []string {
 	
-	//1. make an array like this: [Na H H S O O O O]
 	secondSmallerArray := []string{}
 	canReturn = false
 
